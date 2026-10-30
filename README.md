@@ -77,7 +77,7 @@ npm start            # 빌드 후 실행
 ```
 
 ```bash
-npx electron . --demo   # 데모 데이터로 UI 확인 (npm run build 이후)
+npm run demo         # 데모 데이터로 UI 확인 (빌드 포함)
 ```
 
 ```bash
