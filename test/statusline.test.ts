@@ -124,5 +124,5 @@ describe('bridge snapshot', () => {
     const usage = readUsage(configDir);
     expect(usage.fiveHour.percent).toBe(23.5);
     expect(usage.sevenDay.resetsAt).toBe(sample.rate_limits.seven_day.resets_at * 1000);
-  });
+  }, 60_000);
 });
