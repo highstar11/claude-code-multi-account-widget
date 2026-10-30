@@ -73,11 +73,21 @@ npm install
 ```
 
 ```bash
-npm start            # 빌드 후 실행
+npm run dev          # 개발 모드: 저장하면 바로 반영 (실제 계정)
 ```
 
 ```bash
-npm run demo         # 데모 데이터로 UI 확인 (빌드 포함)
+npm run dev -- --demo   # 개발 모드 + 데모 데이터
+```
+
+개발 모드에서는 `src/renderer/` 파일을 저장하면 위젯이 그 자리에서 바로 바뀌고(Vite HMR), `src/main/`·`src/shared/`·`src/bridge/`를 저장하면 자동으로 다시 컴파일한 뒤 앱이 재시작됩니다. UI의 `console.log`와 오류는 `[ui:…]`로 터미널에 찍힙니다. 끝낼 때는 터미널에서 Ctrl+C를 누르거나 트레이 메뉴의 **종료**를 누르세요.
+
+```bash
+npm start            # 배포용과 같은 방식으로 빌드 후 실행
+```
+
+```bash
+npm run demo         # 빌드 후 데모 데이터로 실행
 ```
 
 ```bash

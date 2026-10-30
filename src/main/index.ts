@@ -146,7 +146,15 @@ function createWindow(): void {
     },
   });
 
-  win.loadFile(path.join(__dirname, '..', '..', 'renderer', 'index.html'));
+  // `npm run dev` serves the UI from Vite so edits show up instantly.
+  const devServer = process.env.VITE_DEV_SERVER_URL;
+  if (devServer) {
+    win.loadURL(devServer);
+    // Show UI errors and console.log output in the terminal running `npm run dev`.
+    win.webContents.on('console-message', (e) => console.log(`[ui:${e.level}] ${e.message}`));
+  } else {
+    win.loadFile(path.join(__dirname, '..', '..', 'renderer', 'index.html'));
+  }
   win.once('ready-to-show', () => {
     if (!captureArg) win?.show();
   });
@@ -159,7 +167,9 @@ function createWindow(): void {
   win.on('closed', () => (win = null));
   // The widget never navigates or opens other pages.
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  win.webContents.on('will-navigate', (e) => e.preventDefault());
+  win.webContents.on('will-navigate', (e) => {
+    if (!devServer) e.preventDefault();
+  });
 
   if (captureArg) {
     // CAPTURE_CLICK="[aria-label=설정]|.row" clicks through screens before the screenshot.
