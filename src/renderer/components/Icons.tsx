@@ -52,6 +52,13 @@ export const ChevronIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const RefreshIcon = (p: IconProps) => (
+  <Icon size={14} {...p}>
+    <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+    <path d="M21 3v6h-6" />
+  </Icon>
+);
+
 export const CopyIcon = (p: IconProps) => (
   <Icon size={13} {...p}>
     <rect x="9" y="9" width="11" height="11" rx="2" />

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { api } from '../lib/api';
 import { KIND_LABEL, levelColor } from '../lib/usage';
 import { formatAgo, formatDuration, formatTokens } from '../../shared/format';
 import { CommandBox } from './CommandBox';
+import { RefreshIcon } from './Icons';
 import { UsageBar } from './UsageBar';
 import { useToast } from './Toast';
 import type { AccountView, Platform, UsageWindow } from '../../shared/types';
@@ -43,10 +45,17 @@ interface AccountCardProps {
     now: number;
 }
 
-/** One account on the home screen: setup hints until data arrives, then rings and numbers. */
+/** One account on the home screen: setup hints until data arrives, then bars and numbers. */
 export function AccountCard({ view: v, platform, now }: AccountCardProps) {
     const toast = useToast();
     const { account } = v;
+    const [refreshing, setRefreshing] = useState(false);
+
+    const refresh = async () => {
+        setRefreshing(true);
+        await toast.report(api.refreshUsage(account.id), '사용량을 갱신했습니다');
+        setRefreshing(false);
+    };
 
     const head = (
         <div className="card-head">
@@ -54,10 +63,22 @@ export function AccountCard({ view: v, platform, now }: AccountCardProps) {
             <span className={`chip chip-${account.kind}`}>{KIND_LABEL[account.kind]}</span>
             <span className="spacer" />
             {v.capturedAt && <span className="ago">{formatAgo(now - v.capturedAt)}</span>}
+            {v.bridge !== 'no-config-dir' && (
+                <button
+                    className={`icon-btn refresh-btn ${refreshing ? 'spinning' : ''}`}
+                    onClick={refresh}
+                    disabled={refreshing}
+                    aria-label="지금 갱신"
+                    title="지금 갱신 (Claude Code로 아주 짧은 요청을 한 번 보냅니다)"
+                >
+                    <RefreshIcon />
+                </button>
+            )}
         </div>
     );
 
-    if (v.bridge !== 'installed') {
+    // Without the status line, a manual refresh can still provide numbers.
+    if (v.bridge !== 'installed' && !v.capturedAt) {
         const canInstall = v.bridge === 'missing' || v.bridge === 'no-config-dir';
         return (
             <section className="card">
@@ -83,7 +104,7 @@ export function AccountCard({ view: v, platform, now }: AccountCardProps) {
                 <p className="hint">
                     {v.noRateLimits
                         ? '이 계정은 한도 정보를 제공하지 않습니다. Pro / Max 구독 계정에서만 표시됩니다.'
-                        : '연결됨. 이 계정으로 Claude Code에서 메시지를 한 번 보내면 표시됩니다.'}
+                        : '연결됨. 이 계정으로 Claude Code에서 메시지를 보내거나 오른쪽 위 ↻ 버튼을 누르면 표시됩니다.'}
                 </p>
                 {!v.noRateLimits && <CommandBox account={account} platform={platform} />}
             </section>

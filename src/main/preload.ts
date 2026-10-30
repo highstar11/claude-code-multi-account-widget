@@ -13,6 +13,7 @@ const api: WidgetApi = {
   removeAccount: (id) => ipcRenderer.invoke('remove-account', id),
   installBridge: (id) => ipcRenderer.invoke('install-bridge', id),
   uninstallBridge: (id) => ipcRenderer.invoke('uninstall-bridge', id),
+  refreshUsage: (id) => ipcRenderer.invoke('refresh-usage', id),
   pickDirectory: () => ipcRenderer.invoke('pick-directory'),
   defaultConfigDir: (kind) => ipcRenderer.invoke('default-config-dir', kind),
   copyText: (text) => ipcRenderer.invoke('copy-text', text),

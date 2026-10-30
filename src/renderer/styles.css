@@ -619,3 +619,21 @@ button.row:hover {
 ::-webkit-scrollbar {
   width: 0;
 }
+
+/* ---------- refresh button ---------- */
+.card-head .refresh-btn {
+  width: 22px;
+  height: 22px;
+  margin-right: -4px;
+}
+.refresh-btn:disabled {
+  cursor: default;
+}
+.refresh-btn.spinning svg {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

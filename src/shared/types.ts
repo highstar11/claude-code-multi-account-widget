@@ -81,6 +81,8 @@ export interface WidgetApi {
   removeAccount(id: string): Promise<Result>;
   installBridge(id: string): Promise<Result>;
   uninstallBridge(id: string): Promise<Result>;
+  /** Fetches current limits with one minimal headless Claude Code request. */
+  refreshUsage(id: string): Promise<Result>;
   pickDirectory(): Promise<string | null>;
   defaultConfigDir(kind: AccountKind): Promise<string>;
   copyText(text: string): Promise<void>;

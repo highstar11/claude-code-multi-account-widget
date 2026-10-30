@@ -1,11 +1,17 @@
 import { app, BrowserWindow, clipboard, dialog, ipcMain, Menu, nativeImage, screen, Tray } from 'electron';
 import { execFileSync } from 'node:child_process';
+
+// @ts-ignore
 import fs from 'node:fs';
+// @ts-ignore
 import os from 'node:os';
+// @ts-ignore
 import path from 'node:path';
+
 import { AccountStore, readJson, writeJsonAtomic } from './accounts';
 import { bridgeStatus, installBridge, uninstallBridge, type InstallOptions } from './statusline';
 import { readUsage, TranscriptScanner, windowStarts } from './usage';
+import { refreshUsage } from './refresh';
 import { demoAccounts } from './demo';
 import type { AccountInput, AccountKind, AccountView, Platform, Result, WidgetSettings, WidgetState } from '../shared/types';
 
@@ -26,6 +32,11 @@ let settings: StoredSettings = { alwaysOnTop: false, openAtLogin: false };
 const scanner = new TranscriptScanner();
 const tokenCache = new Map<string, { fiveHour: number; sevenDay: number }>();
 let lastBroadcast = '';
+
+/** Each refresh is a real (tiny) Claude request, so allow one per account per minute. */
+const REFRESH_COOLDOWN_MS = 60_000;
+const lastRefresh = new Map<string, number>();
+const refreshing = new Set<string>();
 
 if (!app.requestSingleInstanceLock()) app.quit();
 app.on('second-instance', () => showWindow());
@@ -65,8 +76,8 @@ function installOptions(): InstallOptions {
 function buildState(): WidgetState {
   const now = Date.now();
   const accounts: AccountView[] = isDemo
-    ? demoAccounts(now)
-    : store.list().map((account) => ({
+      ? demoAccounts(now)
+      : store.list().map((account) => ({
         account,
         bridge: bridgeStatus(account.configDir),
         ...readUsage(account.configDir, now),
@@ -210,31 +221,31 @@ function createTray(): void {
 
 function refreshTrayMenu(): void {
   tray?.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: '위젯 보기 / 숨기기', click: toggleWindow },
-      { type: 'separator' },
-      {
-        label: '항상 위에 표시',
-        type: 'checkbox',
-        checked: settings.alwaysOnTop,
-        click: (item) => applySettings({ alwaysOnTop: item.checked }),
-      },
-      {
-        label: '로그인 시 실행',
-        type: 'checkbox',
-        checked: settings.openAtLogin,
-        click: (item) => applySettings({ openAtLogin: item.checked }),
-      },
-      {
-        label: '위치 초기화',
-        click: () => {
-          const p = defaultPosition();
-          win?.setPosition(p.x, p.y);
+      Menu.buildFromTemplate([
+        { label: '위젯 보기 / 숨기기', click: toggleWindow },
+        { type: 'separator' },
+        {
+          label: '항상 위에 표시',
+          type: 'checkbox',
+          checked: settings.alwaysOnTop,
+          click: (item) => applySettings({ alwaysOnTop: item.checked }),
         },
-      },
-      { type: 'separator' },
-      { label: '종료', role: 'quit' },
-    ]),
+        {
+          label: '로그인 시 실행',
+          type: 'checkbox',
+          checked: settings.openAtLogin,
+          click: (item) => applySettings({ openAtLogin: item.checked }),
+        },
+        {
+          label: '위치 초기화',
+          click: () => {
+            const p = defaultPosition();
+            win?.setPosition(p.x, p.y);
+          },
+        },
+        { type: 'separator' },
+        { label: '종료', role: 'quit' },
+      ]),
   );
 }
 
@@ -276,25 +287,45 @@ function accountOrThrow(id: string) {
 function registerIpc(): void {
   ipcMain.handle('get-state', () => buildState());
   ipcMain.handle('add-account', (_e, input: AccountInput) =>
-    run(() => {
-      const account = store.add(input);
-      // Wire up the status line right away when the folder already exists.
-      if (bridgeStatus(account.configDir) === 'missing') installBridge(account.configDir, installOptions());
-    }),
+      run(() => {
+        const account = store.add(input);
+        // Wire up the status line right away when the folder already exists.
+        if (bridgeStatus(account.configDir) === 'missing') installBridge(account.configDir, installOptions());
+      }),
   );
   ipcMain.handle('update-account', (_e, id: string, patch: Partial<AccountInput>) => run(() => store.update(id, patch)));
   ipcMain.handle('remove-account', (_e, id: string) =>
-    run(() => {
-      const account = accountOrThrow(id);
-      if (bridgeStatus(account.configDir) === 'installed') uninstallBridge(account.configDir);
-      store.remove(id);
-      tokenCache.delete(id);
-    }),
+      run(() => {
+        const account = accountOrThrow(id);
+        if (bridgeStatus(account.configDir) === 'installed') uninstallBridge(account.configDir);
+        store.remove(id);
+        tokenCache.delete(id);
+      }),
   );
   ipcMain.handle('install-bridge', (_e, id: string) =>
-    run(() => installBridge(accountOrThrow(id).configDir, installOptions())),
+      run(() => installBridge(accountOrThrow(id).configDir, installOptions())),
   );
   ipcMain.handle('uninstall-bridge', (_e, id: string) => run(() => uninstallBridge(accountOrThrow(id).configDir)));
+  ipcMain.handle('refresh-usage', async (_e, id: string): Promise<Result> => {
+    if (isDemo) {
+      await new Promise((r) => setTimeout(r, 800));
+      return { ok: true };
+    }
+    if (refreshing.has(id)) return { ok: false, error: '이미 갱신 중입니다.' };
+    const wait = (lastRefresh.get(id) ?? 0) + REFRESH_COOLDOWN_MS - Date.now();
+    if (wait > 0) return { ok: false, error: `${Math.ceil(wait / 1000)}초 후에 다시 갱신할 수 있습니다.` };
+    refreshing.add(id);
+    lastRefresh.set(id, Date.now());
+    try {
+      await refreshUsage(accountOrThrow(id).configDir);
+      broadcast(true);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    } finally {
+      refreshing.delete(id);
+    }
+  });
   ipcMain.handle('pick-directory', async () => {
     const res = await dialog.showOpenDialog(win!, {
       title: 'Claude Code 설정 폴더 선택',
