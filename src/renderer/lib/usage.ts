@@ -14,11 +14,6 @@ export function levelColor(percent: number | null, base: string): string {
   return base;
 }
 
-/** The weekly (inner) ring uses a lighter tint of the account color, like Activity rings. */
-export function innerTint(color: string): string {
-  return `color-mix(in srgb, ${color} 55%, white)`;
-}
-
 /** The shell command that starts Claude Code with this account. */
 export function launchCommand(account: Account, platform: Platform): string {
   if (/[\\/]\.claude$/.test(account.configDir)) return 'claude';

@@ -4,7 +4,7 @@
 
 <img src="docs/screenshot-windows.png" width="360" alt="위젯 스크린샷 (데모 데이터)">
 
-- 계정별 Activity 링: 바깥 = 현재 세션(5시간), 안쪽 = 주간(7일)
+- 계정별 Activity Bar
 - 초기화까지 남은 시간 실시간 카운트다운, 75% 주황 / 90% 빨강 경고
 - 로컬 트랜스크립트 기준 토큰 사용량(5시간 / 7일) 보조 표시
 - macOS: 반투명 vibrancy, SF Pro, iOS 그룹 리스트·스위치

@@ -12,11 +12,12 @@ interface HomeViewProps {
 
 export function HomeView({ state, onSettings, onAdd }: HomeViewProps) {
   const now = useNow();
+  const headerTitle = "클로드 사용량";
 
   if (state.accounts.length === 0) {
     return (
       <>
-        <Header title="Claude 사용량" onSettings={onSettings} />
+        <Header title={headerTitle} onSettings={onSettings} />
         <section className="card empty">
           <div className="empty-rings">
             <UsageRings
@@ -40,7 +41,7 @@ export function HomeView({ state, onSettings, onAdd }: HomeViewProps) {
 
   return (
     <>
-      <Header title="Claude 사용량" onSettings={onSettings} />
+      <Header title={headerTitle} onSettings={onSettings} />
       {state.demo && <div className="demo">데모 데이터</div>}
       <div className="list">
         {state.accounts.map((v) => (

@@ -217,63 +217,73 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-.card-body {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 10px;
-}
+/* Rings are still used for the empty-state illustration. */
 .rings {
-  width: 68px;
-  height: 68px;
   flex: none;
 }
 .ring-fill {
   transition: stroke-dasharray 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
 }
+
+/* ---------- usage bars ---------- */
 .metrics {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+.metric-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
 }
 .metric-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--label-2);
 }
-.metric-label i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
 .metric-value {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.03em;
-  line-height: 1.15;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .metric-value small {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--label-2);
   margin-left: 1px;
 }
 .metric-sub {
+  margin-top: 5px;
   font-size: 11px;
-  color: var(--label-2);
+  color: var(--label-3);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .platform-win .metric-value {
   font-family: 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   letter-spacing: -0.01em;
+}
+
+.usage-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.usage-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.platform-win .usage-bar {
+  height: 4px;
+  border-radius: 2px;
 }
 
 .foot {
