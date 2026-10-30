@@ -1,0 +1,611 @@
+/*
+ * Shared tokens first, then per-platform variants:
+ *  - macOS: vibrancy window, SF Pro, large continuous radii, iOS grouped lists.
+ *  - Windows: acrylic window, Segoe UI Variable, Fluent radii and hairline borders.
+ */
+
+:root {
+  color-scheme: light dark;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+
+  --blue: #007aff;
+  --green: #34c759;
+  --orange: #ff9500;
+  --red: #ff3b30;
+
+  --label: rgba(0, 0, 0, 0.88);
+  --label-2: rgba(60, 60, 67, 0.62);
+  --label-3: rgba(60, 60, 67, 0.4);
+  --separator: rgba(60, 60, 67, 0.14);
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-strong: rgba(120, 120, 128, 0.2);
+
+  --window-bg: rgba(242, 242, 247, 0.72);
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-border: transparent;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.05);
+
+  --radius-window: 22px;
+  --radius-card: 18px;
+  --radius-control: 10px;
+  --gap: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --blue: #0a84ff;
+    --green: #30d158;
+    --orange: #ff9f0a;
+    --red: #ff453a;
+
+    --label: rgba(255, 255, 255, 0.92);
+    --label-2: rgba(235, 235, 245, 0.6);
+    --label-3: rgba(235, 235, 245, 0.32);
+    --separator: rgba(84, 84, 88, 0.5);
+    --fill: rgba(120, 120, 128, 0.24);
+    --fill-strong: rgba(120, 120, 128, 0.36);
+
+    --window-bg: rgba(28, 28, 30, 0.62);
+    --card-bg: rgba(58, 58, 60, 0.42);
+    --card-shadow: none;
+  }
+}
+
+/* ---------- Windows (Fluent) ---------- */
+.platform-win {
+  --radius-window: 8px;
+  --radius-card: 8px;
+  --radius-control: 4px;
+  --gap: 8px;
+  --window-bg: rgba(243, 243, 243, 0.62);
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+@media (prefers-color-scheme: dark) {
+  .platform-win {
+    --window-bg: rgba(32, 32, 32, 0.55);
+    --card-bg: rgba(255, 255, 255, 0.055);
+    --card-border: rgba(255, 255, 255, 0.07);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--label);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  user-select: none;
+  cursor: default;
+}
+
+.platform-win body {
+  font-family: 'Segoe UI Variable Text', 'Segoe UI', 'Malgun Gothic', system-ui, sans-serif;
+}
+
+.widget {
+  position: relative;
+  padding: 6px 12px 12px;
+  background: var(--window-bg);
+  border-radius: var(--radius-window);
+}
+
+/* Vibrancy already tints the macOS window; keep only a whisper of color on top. */
+.platform-mac .widget {
+  background: color-mix(in srgb, var(--window-bg) 45%, transparent);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ---------- header ---------- */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  -webkit-app-region: drag;
+}
+.bar h1 {
+  margin: 0 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.bar .icon-btn {
+  -webkit-app-region: no-drag;
+}
+.platform-win .bar h1 {
+  font-family: 'Segoe UI Variable Display', 'Segoe UI', 'Malgun Gothic', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.spacer {
+  flex: 1;
+}
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--label-2);
+  transition: background 0.15s, color 0.15s;
+}
+.icon-btn:hover {
+  background: var(--fill);
+  color: var(--label);
+}
+.platform-win .icon-btn {
+  border-radius: var(--radius-control);
+}
+
+.demo {
+  margin: -2px 4px 8px;
+  font-size: 11px;
+  color: var(--label-3);
+}
+
+/* ---------- cards ---------- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  padding: 12px 14px 12px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+}
+.card-head .name {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chip {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--fill);
+  color: var(--label-2);
+}
+.chip-work {
+  background: color-mix(in srgb, var(--blue) 16%, transparent);
+  color: var(--blue);
+}
+.platform-win .chip {
+  border-radius: 4px;
+}
+.ago {
+  font-size: 11px;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+.rings {
+  width: 68px;
+  height: 68px;
+  flex: none;
+}
+.ring-fill {
+  transition: stroke-dasharray 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.metrics {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.metric-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--label-2);
+}
+.metric-label i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.metric-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.metric-value small {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--label-2);
+  margin-left: 1px;
+}
+.metric-sub {
+  font-size: 11px;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.platform-win .metric-value {
+  font-family: 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.foot {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--separator);
+  font-size: 11px;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  margin: 8px 0 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+.cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border-radius: var(--radius-control);
+  background: var(--fill);
+  color: var(--label-2);
+  text-align: left;
+}
+.cmd code {
+  flex: 1;
+  font: 11px ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+  color: var(--label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cmd:hover {
+  background: var(--fill-strong);
+}
+
+/* ---------- empty state ---------- */
+.empty {
+  text-align: center;
+  padding: 22px 18px 16px;
+}
+.empty-rings .rings {
+  width: 76px;
+  height: 76px;
+}
+.empty h2 {
+  margin: 10px 0 6px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.empty p {
+  margin: 0 0 16px;
+  color: var(--label-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: block;
+  width: 100%;
+  height: 38px;
+  margin-top: 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: filter 0.15s, background 0.15s;
+}
+.btn-filled {
+  background: var(--blue);
+  color: #fff;
+}
+.btn-filled:hover {
+  filter: brightness(1.08);
+}
+.btn-tinted {
+  background: color-mix(in srgb, var(--blue) 15%, transparent);
+  color: var(--blue);
+  height: 32px;
+}
+.btn-plain {
+  color: var(--blue);
+}
+.btn-plain:hover,
+.btn-destructive:hover {
+  background: var(--fill);
+}
+.btn-destructive {
+  color: var(--red);
+}
+.platform-win .btn {
+  border-radius: var(--radius-control);
+  height: 32px;
+  font-weight: 500;
+}
+.btn-small {
+  flex: none;
+  padding: 0 10px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--fill);
+  font-size: 12px;
+  font-weight: 500;
+}
+.btn-small:hover {
+  background: var(--fill-strong);
+}
+
+/* ---------- grouped list (settings) ---------- */
+.scroll {
+  max-height: 560px;
+  overflow-y: auto;
+  padding-bottom: 4px;
+}
+.group-title {
+  margin: 14px 12px 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--label-2);
+}
+.group {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+.group.pad {
+  padding: 8px 8px 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--label);
+}
+.row + .row {
+  border-top: 0.5px solid var(--separator);
+}
+button.row:hover {
+  background: var(--fill);
+}
+.row > svg {
+  color: var(--label-3);
+  flex: none;
+}
+.row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.row-text small {
+  font-size: 11px;
+  color: var(--label-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-status {
+  font-size: 11.5px;
+  color: var(--label-3);
+}
+.row-status.ok {
+  color: var(--green);
+}
+.row-add {
+  color: var(--blue);
+  font-weight: 500;
+}
+.row-add > svg {
+  color: var(--blue);
+}
+
+.footnote {
+  margin: 8px 12px 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--label-3);
+}
+
+/* ---------- form ---------- */
+.field {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--label);
+  font: inherit;
+  font-size: 13.5px;
+  outline: none;
+  user-select: text;
+}
+.field-row {
+  display: flex;
+  align-items: center;
+  padding-right: 6px;
+}
+.field-row .field {
+  font-size: 12px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+}
+.platform-win .group:focus-within {
+  border-bottom: 2px solid var(--blue);
+}
+
+.swatches {
+  display: flex;
+  gap: 12px;
+  padding: 4px 12px;
+}
+.swatch input {
+  position: absolute;
+  opacity: 0;
+}
+.swatch span {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 0 0 var(--c);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.swatch input:checked + span {
+  box-shadow: 0 0 0 2px var(--window-bg), 0 0 0 4px var(--c);
+}
+
+#account-form .btn-filled {
+  margin-top: 18px;
+}
+
+/* iOS switch */
+.switch {
+  appearance: none;
+  position: relative;
+  width: 42px;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--fill-strong);
+  cursor: pointer;
+  transition: background 0.2s;
+  flex: none;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.switch:checked {
+  background: var(--green);
+}
+.switch:checked::after {
+  transform: translateX(16px);
+}
+/* Fluent toggle */
+.platform-win .switch {
+  width: 40px;
+  height: 20px;
+  background: transparent;
+  border: 1px solid var(--label-2);
+}
+.platform-win .switch::after {
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  background: var(--label-2);
+  box-shadow: none;
+}
+.platform-win .switch:checked {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.platform-win .switch:checked::after {
+  background: #fff;
+  transform: translateX(20px);
+}
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(30, 30, 30, 0.86);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  animation: toast-in 0.25s ease-out;
+}
+.toast.error {
+  background: var(--red);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 0;
+}
