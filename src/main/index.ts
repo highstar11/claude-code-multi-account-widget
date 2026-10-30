@@ -162,8 +162,14 @@ function createWindow(): void {
   win.webContents.on('will-navigate', (e) => e.preventDefault());
 
   if (captureArg) {
+    // CAPTURE_CLICK="[aria-label=설정]|.row" clicks through screens before the screenshot.
+    const clicks = process.env.CAPTURE_CLICK?.split('|').filter(Boolean) ?? [];
     win.webContents.once('did-finish-load', () => {
       setTimeout(async () => {
+        for (const selector of clicks) {
+          await win!.webContents.executeJavaScript(`document.querySelector(${JSON.stringify(selector)})?.click()`);
+          await new Promise((r) => setTimeout(r, 400));
+        }
         const image = await win!.webContents.capturePage();
         fs.writeFileSync(captureArg.slice('--capture='.length), image.toPNG());
         app.quit();

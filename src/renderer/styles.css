@@ -392,7 +392,7 @@ button {
 
 /* ---------- grouped list (settings) ---------- */
 .scroll {
-  max-height: 560px;
+  max-height: 640px;
   overflow-y: auto;
   padding-bottom: 4px;
 }

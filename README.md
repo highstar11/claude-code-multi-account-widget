@@ -102,10 +102,25 @@ src/
     usage.ts       snapshot 읽기, 로컬 트랜스크립트 토큰 집계
     preload.ts     렌더러에 노출하는 최소 API (contextIsolation + sandbox)
   bridge/      상태줄 브리지 (macOS·Linux: Node, Windows: PowerShell)
-  renderer/    위젯 UI (바닐라 TS + CSS, 플랫폼별 스타일 분기)
-  shared/      타입, 포맷터
+  renderer/    위젯 UI (React + TypeScript, Vite로 번들)
+    main.tsx       진입점
+    App.tsx        화면 전환 (home / settings / edit)
+    views/         화면 단위 컴포넌트 (HomeView, SettingsView, EditView)
+    components/    재사용 컴포넌트 (AccountCard, UsageRings, Header, Toast, Icons…)
+    hooks/         useWidgetState(메인 프로세스 상태 구독), useNow, useAutoResize
+    lib/           api(window.widget), 경고 색상·실행 명령 등 UI 로직
+    styles.css     디자인 전체 (:root 토큰, .platform-win 덮어쓰기, 다크 모드)
+  shared/      타입, 포맷터 (메인·렌더러 공용)
 test/          vitest
 ```
+
+### UI 수정 가이드
+
+- **디자인**: `styles.css`의 `:root` 변수(색상, 모서리, 간격)부터 바꾸세요. Windows 전용 값은 `.platform-win` 블록에 있습니다.
+- **카드 내용**: `components/AccountCard.tsx`. 경고 기준(75% / 90%)은 `lib/usage.ts`의 `WARN_AT`, `DANGER_AT`.
+- **새 화면**: `views/`에 컴포넌트를 만들고 `App.tsx`의 `Route` 타입과 분기에 추가합니다.
+- **메인 프로세스 기능 호출**: `src/shared/types.ts`의 `WidgetApi` → `src/main/preload.ts` → `src/main/index.ts`의 `registerIpc()` 순서로 추가하면 렌더러에서 `api.새기능()`으로 쓸 수 있습니다.
+- **스크린샷**: `npm run build` 후 `npx electron . --demo --capture=shot.png`. 화면을 넘기려면 `CAPTURE_CLICK="[aria-label=설정]|button.row"`처럼 클릭할 셀렉터를 `|`로 이어 환경 변수로 넘깁니다.
 
 ### 플랫폼별 메모
 
